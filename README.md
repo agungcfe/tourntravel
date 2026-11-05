@@ -24,18 +24,41 @@ UI responsive (desktop, tablet, mobile) dengan animasi halus, tanpa build step f
 | `admin`  | Semua fitur, termasuk User Management & Pengaturan |
 | `editor` | Kelola konten & booking |
 
-## Instalasi
+## Instalasi (MySQL)
 
-Kebutuhan: PHP 8.2+, Composer, SQLite atau MySQL.
+Kebutuhan: PHP 8.2+, Composer, MySQL 5.7+/8.x atau MariaDB 10.3+.
 
+**1. Ambil kode & install dependency**
 ```bash
-git clone https://github.com/agungcfe/tourntravel.git
+git clone -b tnt-staging https://github.com/agungcfe/tourntravel.git
 cd tourntravel
 composer install
 cp .env.example .env
 php artisan key:generate
-touch database/database.sqlite      # jika memakai SQLite (default)
-php artisan migrate --seed
+```
+
+**2. Buat database & import SQL**
+
+Buat database kosong bernama `tourntravel` (collation `utf8mb4_unicode_ci`), lalu import file
+[`database/tourntravel.sql`](database/tourntravel.sql) — lewat phpMyAdmin (menu *Import*) atau terminal:
+
+```bash
+mysql -u root -p -e "CREATE DATABASE tourntravel CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+mysql -u root -p tourntravel < database/tourntravel.sql
+```
+
+**3. Sesuaikan `.env`**
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=tourntravel
+DB_USERNAME=root
+DB_PASSWORD=password_mysql_anda
+```
+
+**4. Jalankan**
+```bash
 php artisan storage:link
 php artisan serve
 ```
@@ -49,15 +72,8 @@ Buka http://localhost:8000 — CMS di http://localhost:8000/login
 
 > Segera ganti password akun demo sebelum online.
 
-**Memakai MySQL:** ubah di `.env`
-```
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=tourntravel
-DB_USERNAME=root
-DB_PASSWORD=
-```
+**Alternatif tanpa import SQL:** setelah langkah 3, jalankan `php artisan migrate --seed`
+untuk membuat tabel + data contoh yang sama.
 
 ## Struktur MVC
 
@@ -110,6 +126,8 @@ tests/Feature/                          # WebsiteTest, AdminTest
 ```bash
 php artisan test
 ```
+
+Test memakai SQLite in-memory (lihat `phpunit.xml`), jadi tidak menyentuh database MySQL Anda.
 
 ## Catatan
 - Gambar contoh memakai `picsum.photos`; ganti lewat CMS dengan upload gambar asli.
